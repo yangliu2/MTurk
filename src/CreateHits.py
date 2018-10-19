@@ -1,6 +1,8 @@
 import boto3
+
 MTURK_SANDBOX = 'https://mturk-requester-sandbox.us-east-1.amazonaws.com'
 MTURK = 'https://mturk-requester.us-east-1.amazonaws.com'
+
 
 def get_balance(profile_name='mturk', endpoint='sandbox'):
     # switch between sandbox and prod
@@ -19,30 +21,43 @@ def get_balance(profile_name='mturk', endpoint='sandbox'):
     print("I have $" + client.get_account_balance()['AvailableBalance'] + " in my Sandbox account")
     return client
 
+def modify_page(image, question):
+    mod = question.format(image_name=image)
+    return mod
+
 def create_hit(mturk):
+    '''
+        keep the same title so Mturk can group all the hits togther
+    '''
     question = open('templates/questions.xml', 'r').read()
-    new_hit = mturk.create_hit(
-        Title = 'Is this Tweet happy, angry, excited, scared, annoyed or upset?',
-        Description = 'Read this tweet and type out one word to describe the emotion of the person posting it: happy, angry, scared, annoyed or upset',
-        Keywords = 'text, quick, labeling',
-        Reward = '0.2',
-        MaxAssignments = 1,
-        LifetimeInSeconds = 60 * 60 * 48, # lenght on market
-        AssignmentDurationInSeconds = 60 * 10, # time to complete once opened
-        AutoApprovalDelayInSeconds = 60 * 60 * 4, # time until automatic approval if no user did it
-        Question = question,
-    )
-    print("A new HIT has been created. You can preview it here:")
-    print("https://workersandbox.mturk.com/mturk/preview?groupId=" + new_hit['HIT']['HITGroupId'])
-    print("HITID = " + new_hit['HIT']['HITId'] + " (Use to Get Results)")
-    # Remember to modify the URL above when you're publishing
-    # HITs to the live marketplace.
-    # Use: https://worker.mturk.com/mturk/preview?groupId=
+    hit_ids = []
+    images = ['1', '2']
+    for image in images:
+        question_mod = modify_page(image, question)
+        new_hit = mturk.create_hit(
+            Title = 'Is this Tweet happy, angry, excited, scared, annoyed or upset?',
+            Description = 'Read this tweet and type out one word to describe the emotion of the person posting it: happy, angry, scared, annoyed or upset',
+            Keywords = 'text, quick, labeling',
+            Reward = '0.2',
+            MaxAssignments = 1,
+            LifetimeInSeconds = 60 * 60 * 48, # lenght on market
+            AssignmentDurationInSeconds = 60 * 10, # time to complete once opened
+            AutoApprovalDelayInSeconds = 60 * 60 * 4, # time until automatic approval if no user did it
+            Question = question_mod,
+        )
+        print("A new HIT has been created. You can preview it here:")
+        print("https://workersandbox.mturk.com/mturk/preview?groupId=" + new_hit['HIT']['HITGroupId'])
+        print("HITID = " + new_hit['HIT']['HITId'] + " (Use to Get Results)")
+        hit_ids.append(new_hit['HIT']['HITId'])
+        # Remember to modify the URL above when you're publishing
+        # HITs to the live marketplace.
+        # Use: https://worker.mturk.com/mturk/preview?groupId=
+    return hit_ids
+
 
 def main():
-    mturk = get_balance('tic')
-    # create_hit(mturk)
-    
+    mturk = get_balance()
+    hit_ids = create_hit(mturk)
 
 
 if __name__ == '__main__':
