@@ -31,6 +31,7 @@ def create_hit(mturk):
     '''
     question = open('templates/questions.xml', 'r').read()
     hit_ids = []
+    link = None
     images = ['1', '2']
     for image in images:
         question_mod = modify_page(image, question)
@@ -46,18 +47,27 @@ def create_hit(mturk):
             Question = question_mod,
         )
         print("A new HIT has been created. You can preview it here:")
-        print("https://workersandbox.mturk.com/mturk/preview?groupId=" + new_hit['HIT']['HITGroupId'])
+        link = "https://workersandbox.mturk.com/mturk/preview?groupId=" + new_hit['HIT']['HITGroupId']
+        print(link)
         print("HITID = " + new_hit['HIT']['HITId'] + " (Use to Get Results)")
         hit_ids.append(new_hit['HIT']['HITId'])
         # Remember to modify the URL above when you're publishing
         # HITs to the live marketplace.
         # Use: https://worker.mturk.com/mturk/preview?groupId=
-    return hit_ids
+    return link, hit_ids
 
+def write_hits(link, hit_ids):
+    with open('hits/last_hits.csv', 'w') as output, open('hits/log.csv', 'a') as log:
+        output.write(link+'\n')
+        log.write(link+'\n')
+        for hit in hit_ids:
+            output.write(hit+'\n')
+            log.write(hit+'\n')
 
 def main():
     mturk = get_balance()
-    hit_ids = create_hit(mturk)
+    link, hit_ids = create_hit(mturk)
+    write_hits(link, hit_ids)
 
 
 if __name__ == '__main__':
