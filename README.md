@@ -2,6 +2,8 @@
 
 **This package will be used to give task to Amazon's Mechanical Turks to label picture manually. It can probably be used to do other tasks on Mturk as well.**
 
+I learned all this through the MTurk tutorials. https://blog.mturk.com/tutorials/home.
+
 #### Prep work
 Have the following accounts:
 1. AWS
